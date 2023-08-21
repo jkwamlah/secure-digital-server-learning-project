@@ -54,7 +54,7 @@ app.post("/send", (req, res) => {
             res.status(400).send({message: "Recipient not found!"});
         }
     } else {
-        res.status(400).send({message: "Digital signature verification unsuccessful!"});
+        res.send({message: "Digital signature verification unsuccessful!"});
     }
 });
 
@@ -69,5 +69,5 @@ function setInitialBalance(address) {
 }
 
 function verifySignedData(signed, hashedData, publicKey) {
-    return secp.verify(signed, hexToBytes(hashedData), hexToBytes(publicKey))
+    if (secp.verify(signed, hexToBytes(hashedData), hexToBytes(publicKey))) return true
 }

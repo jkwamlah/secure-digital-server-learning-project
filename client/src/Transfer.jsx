@@ -39,10 +39,14 @@ function Transfer({address, setBalance}) {
 
             await server.post(`send`, {...serializedSignature, ...data})
                 .then(response => {
-                    if (response.status === 200) return setBalance(response.data.balance);
+                    if (response.status === 200) {
+                        setBalance(response.data.balance);
+                        alert(`Debit of ${sendAmount} on Wallet: ${address} successful`)
+                    }
                 }).catch(error => {
                     if (error.response.data) alert(error.response.data.message)
                     console.log(error)
+                    alert("Digital signature verification unsuccessful!")
                 });
         } catch (exception) {
             console.log(exception);
