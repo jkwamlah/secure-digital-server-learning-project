@@ -1,54 +1,79 @@
-import { useState } from "react";
-import server from "./server";
+import {useState} from "react";
+import server from "./server.js";
+import signMessage from "./helpers.js";
 
-function Transfer({ address, setBalance, privateKey }) {
-  const [sendAmount, setSendAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
+// import process from 'process';
 
-  const setValue = (setter) => (evt) => setter(evt.target.value);
+function Transfer({address, setBalance}) {
+    const [sendAmount, setSendAmount] = useState("");
+    const [recipient, setRecipient] = useState("");
 
-  async function transfer(evt) {
-    evt.preventDefault();
-    
-    try {
-      const {
-        data: { balance },
-      } = await server.post(`send`, {
-        sender: address,
-        amount: parseInt(sendAmount),
-        recipient,
-      });
-      setBalance(balance);
-    } catch (ex) {
-      alert(ex.response.data.message);
+    const setValue = (setter) => (evt) => setter(evt.target.value);
+
+    async function transfer(event) {
+        event.preventDefault();
+
+        try {
+            for (const [field, value] of Object.entries({sendAmount, recipient, address})) {
+                const message = value === "" ? "empty" : value
+
+                if (field === 'sendAmount' && [null, "", 0].includes(value)) return alert(`Field '${field}' cannot be ${message}`)
+                if (field === 'recipient' && [null, "null", ""].includes(value)) return alert(`Field '${field}' cannot be ${message}`)
+                if (field === 'address' && [null, "null", ""].includes(value)) return alert(`Wallet '${field}' cannot be ${message}`)
+            }
+
+            const privateKey = '643b7effbe48d491bab7dc3839d841ec1bdf7b2942357964dad2bb839726dcd1'
+            const data = {
+                sender: address,
+                amount: parseInt(sendAmount),
+                recipient,
+            }
+            const signature = signMessage(data, privateKey);
+            const serializedSignature = {
+                r: signature._signedMessage.r.toString(),
+                s: signature._signedMessage.s.toString(),
+                recovery: signature._signedMessage.recovery.toString(),
+                hashedData: signature.hashedMessage,
+                publicKey: signature.publicKey
+            };
+
+            await server.post(`send`, {...serializedSignature, ...data})
+                .then(response => {
+                    if (response.status === 200) return setBalance(response.data.balance);
+                }).catch(error => {
+                    if (error.response.data) alert(error.response.data.message)
+                    console.log(error)
+                });
+        } catch (exception) {
+            console.log(exception);
+        }
     }
-  }
 
-  return (
-    <form className="container transfer" onSubmit={transfer}>
-      <h1>Send Transaction</h1>
+    return (
+        <form className="container transfer" onSubmit={transfer}>
+            <h1>Send Transaction</h1>
 
-      <label>
-        Send Amount
-        <input
-          placeholder="1, 2, 3..."
-          value={sendAmount}
-          onChange={setValue(setSendAmount)}
-        ></input>
-      </label>
+            <label>
+                Send Amount
+                <input
+                    placeholder="1, 2, 3..."
+                    value={sendAmount}
+                    onChange={setValue(setSendAmount)}
+                />
+            </label>
 
-      <label>
-        Recipient
-        <input
-          placeholder="Type an address, for example: 0x2"
-          value={recipient}
-          onChange={setValue(setRecipient)}
-        ></input>
-      </label>
+            <label>
+                Recipient
+                <input
+                    placeholder="Type an address, for example: 0x2"
+                    value={recipient}
+                    onChange={setValue(setRecipient)}
+                />
+            </label>
 
-      <input type="submit" className="button" value="Transfer" />
-    </form>
-  );
+            <input type="submit" className="button" value="Transfer"/>
+        </form>
+    );
 }
 
 export default Transfer;

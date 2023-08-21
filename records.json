@@ -2,11 +2,16 @@
   {
     "wallet": "a777b77aac4a63620f97",
     "pik": "4f39d7a86f79964a7129aba81d3c8fdfec6d2e0e33b3d1cc20bbc3c02c1f2b28",
-    "balance": 200
+    "balance": 400
   },
   {
     "wallet": "8a3eca43b71097039c36",
     "pik": "c5ab4681481e4b4b805beea8378e59ebbd241f264c536acd64c0a3b22fa77a76",
-    "balance": 200
+    "balance": 500
+  },
+  {
+    "wallet": "48c722b9afa1b7ec73cc",
+    "pik": "2e9104131b3bd18bcc7c508a665ad1d1d93c379aed31d1270c2aee60b4bf0167",
+    "balance": 100
   }
 ]
